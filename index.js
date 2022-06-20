@@ -1,4 +1,3 @@
-const { table } = require("console");
 const express = require("express");
 const http = require("http");
 const app = express();
@@ -6,7 +5,6 @@ const server = http.createServer(app);
 const socket = require("socket.io");
 const io = socket(server, {
   cors: {
-    // origin: "http://localhost:3000",
     origin: "https://simplemathpractice.herokuapp.com",
     methods: ["GET", "POST"],
   },
@@ -15,7 +13,7 @@ const cors = require("cors");
 const path = require("path");
 
 app.use(cors());
-// paths
+
 const admin = io.of("/admin");
 const game = io.of("/");
 
@@ -97,7 +95,6 @@ const setAhuzimProblem = async (level, questionTopic) => {
     theRealAnswer = mana * (100 / ahuz);
   }
 
-  console.log(mana, ahuz, shalem, theRealAnswer, finalTopic);
   return { mana, ahuz, shalem, theRealAnswer, finalTopic };
 };
 
@@ -105,7 +102,6 @@ const setKefelProblem = async (numbersRange, fullNumbers, questionTopic) => {
   let numOne = 0;
   let numTwo = 0;
   let theRealAnswer = 0;
-  console.log("questionTopicquestionTopic", questionTopic);
   if (numbersRange === "10") {
     numOne = Math.floor(Math.random() * 10) + 1;
     numTwo = Math.floor(Math.random() * 10) + 1;
@@ -135,14 +131,12 @@ const setKefelProblem = async (numbersRange, fullNumbers, questionTopic) => {
       theRealAnswer = numOne / numTwo;
     }
   }
-  console.log(numOne, numTwo, theRealAnswer, finalTopic, fullNumbers);
   return { numOne, numTwo, theRealAnswer, finalTopic, fullNumbers };
 };
 
 game.on("connection", (socket) => {
   socket.on("checkIfNameValid", (userNameInput, answer) => {
     const isNameExsist = users.filter((x) => x.userName === userNameInput);
-    console.log("checkIfNameValid: ", userNameInput, isNameExsist);
     if (isNameExsist.length === 0) {
       answer(false);
     } else {
@@ -151,49 +145,29 @@ game.on("connection", (socket) => {
   });
 
   socket.on("pushToNamesArrInServer", (userNameInput) => {
-    console.log("pushToNamesArrInServer: ", userNameInput);
     users.push({ userName: userNameInput, id: socket.id, where: "Welcome" });
-    console.table(users);
   });
 
   socket.on("updateMe", (userObj) => {
     const userToUpdate = users.filter((x) => x.userName === userObj.userName);
     const findUserToUpdate = users.indexOf(userToUpdate[0]);
-    console.log(
-      "findUserToUpdate: ",
-      userObj,
-      findUserToUpdate,
-      users[findUserToUpdate]
-    );
+
     if (findUserToUpdate === -1) {
-      console.log("findUserToUpdate say: NO USER TO UPDATE!!!!!!");
     } else {
       users[findUserToUpdate].id = userObj.id;
       users[findUserToUpdate].where = userObj.where;
     }
-    console.table(users);
   });
-
-  // to do: on disconnect
 
   socket.on("tryToConnectFromFront", (playerToCall, me, answer) => {
     const isNameExsist = users.filter((x) => x.userName === playerToCall);
-    console.log(
-      "tryToConnectFromFront: ",
-      playerToCall,
-      isNameExsist,
-      socket.id,
-      me
-    );
+
     if (isNameExsist.length === 0) {
-      //   שלח לו בחזרה שאין שחקן כזה או שהוא לא אונליין
       answer("notExistOrNotOnline");
     } else {
       if (isNameExsist[0].roomNum) {
-        //   שלח לו בחזרה במשחק ולא יכול כרגע לענות
         answer("inGameNow");
       } else {
-        //   שלח לו בחזרה שמחכים לתשובה מהשחקן
         answer("waitingForAnswerFromUser");
         socket.to(isNameExsist[0].id).emit("invitation", me);
       }
@@ -209,7 +183,7 @@ game.on("connection", (socket) => {
   socket.on(
     "acceptGameOffer",
     (plyaerAccepted, opponentOfferAccepted, answer) => {
-      let roomNum = Math.floor(Math.random() * 1000) + 1; //needs to to it with big numbers and chek they not allready exist
+      let roomNum = Math.floor(Math.random() * 1000) + 1;
       answer(roomNum);
       socket
         .to(opponentOfferAccepted.id)
@@ -218,26 +192,15 @@ game.on("connection", (socket) => {
   );
 
   socket.on("joinMeToRoom", (me, roomNum) => {
-    console.log("server: -JOIM ME TO ROOM-JOIM ME TO ROOM-JOIM ME TO ROOM");
-    console.log("roomNum:", roomNum);
-    console.log("me.id", me.id, me);
-    console.log("socket.id", socket.id);
-    // console.log(socket.rooms);
     socket.join(roomNum);
-    console.log("ROOMS:");
-    console.table(rooms);
     const userToUpdate = users.filter((x) => x.userName === me.userName);
     const findUserToUpdate = users.indexOf(userToUpdate[0]);
     users[findUserToUpdate].roomNum = roomNum;
-    console.log("nanana");
-    console.log(users[findUserToUpdate]);
     if (rooms[roomNum]) {
       rooms[roomNum].push(me);
     } else {
       rooms[roomNum] = [me];
     }
-    console.table(rooms);
-    console.log("END 2");
   });
 
   socket.on(
@@ -250,11 +213,6 @@ game.on("connection", (socket) => {
       fullNumbers,
       numOfQuestionsInGame
     ) => {
-      console.log("gameSettings");
-      console.log("gameTopic", gameTopic);
-      console.log("ahuzimGameLevel", ahuzimGameLevel);
-      console.log("numbersRange", numbersRange);
-      console.log("fullNumbers", fullNumbers);
       settings[roomNum] = {
         gameTopic,
         ahuzimGameLevel,
@@ -263,17 +221,10 @@ game.on("connection", (socket) => {
         numOfQuestionsInGame,
         numOfQuestionsInGameToPlay: numOfQuestionsInGame,
       };
-      console.log("settings[roomNum]: ", settings[roomNum]);
     }
   );
 
   socket.on("meReadyToPlay", (me, opponent, readyOrNot, roomNum) => {
-    console.log("server: meReadyToPlay");
-    console.log("me.id", me.id);
-    console.log("opponent.id", opponent.id);
-    console.log("socket.id", socket.id);
-    console.log("roomNum", roomNum);
-
     socket.in(roomNum).emit("opponentIsReadyToPlay", me, readyOrNot);
   });
 
@@ -282,8 +233,6 @@ game.on("connection", (socket) => {
       settings[roomNum].gamingNow === undefined ||
       settings[roomNum].gamingNow === false
     ) {
-      console.log("startTheGame");
-      console.log("roomNum", roomNum);
       settings[roomNum].gamingNow = true;
       let problem;
       if (settings[roomNum].gameTopic === "kefelGame") {
@@ -295,22 +244,16 @@ game.on("connection", (socket) => {
         problem = await setAhuzimProblem(settings[roomNum].ahuzimGameLevel);
       }
 
-      console.log(problem);
       let theGoldNum = settings[roomNum].numOfQuestionsInGame;
-      console.log("theGoldNumGOLD", theGoldNum);
-
       socket.in(roomNum).emit("startTheGameFromServer", problem, theGoldNum);
       socket.emit("startTheGameFromServer", problem, theGoldNum);
     }
   });
 
   socket.on("amIAnswerdFirst", (roomNum, questNum, answer) => {
-    console.log(roomNum);
     let theGoldNum =
       settings[roomNum].numOfQuestionsInGame -
       settings[roomNum].numOfQuestionsInGameToPlay;
-    console.log("theGoldNumWHO WORKS!!");
-    console.log(theGoldNum);
 
     if (questNum === theGoldNum) {
       answer(true);
@@ -336,7 +279,6 @@ game.on("connection", (socket) => {
           } else if (settings[roomNum].gameTopic === "ahuzimGame") {
             problem = await setAhuzimProblem(settings[roomNum].ahuzimGameLevel);
           }
-          console.log(problem);
           socket.in(roomNum).emit("nextQuest", problem);
           socket.emit("nextQuest", problem);
 
@@ -349,15 +291,10 @@ game.on("connection", (socket) => {
   });
 
   socket.on("rematchOffer", (roomNum, opponent, answer) => {
-    console.log("rematchOffer");
-    // נבדוק שהוא עדיין בחדר - שזה רלוונטי בכלל
     const stilHere = rooms[roomNum].filter(
       (x) => x.userName === opponent.userName
     );
     const isHe = stilHere[0];
-    console.log("stilHere -stilHerestilHerestilHere ");
-    console.log(stilHere, isHe);
-
     if (stilHere.length === 0) {
       answer(false);
     } else {
@@ -376,7 +313,6 @@ game.on("connection", (socket) => {
       questionTopic,
       answer
     ) => {
-      console.log("startTest");
       let problem;
       if (gameTopic === "kefelGame") {
         problem = await setKefelProblem(
@@ -393,45 +329,17 @@ game.on("connection", (socket) => {
   );
 
   socket.on("leaveRoom", (roomNum) => {
-    console.log(`leaveRoom - rooms 1:`);
-    console.log(roomNum);
-    console.table(users);
-    console.table(rooms);
-
     socket.leave(roomNum);
-
-    // update room null for the leaving user in USERS
     const userToUpdate = users.filter((x) => x.id === socket.id);
     const findUserToUpdate = users.indexOf(userToUpdate[0]);
     users[findUserToUpdate].roomNum = null;
-
-    console.log(`leaveRoom - rooms 2:`);
-    console.log(users[findUserToUpdate]);
-    console.log(roomNum);
-    console.table(users);
-
-    // update player leaving the room in ROOMS
     if (rooms[roomNum]) {
       const leavingUser = rooms[roomNum].findIndex((x) => x.id === socket.id);
-      console.log("leavingUserINDEX: ", leavingUser);
       rooms[roomNum].splice(leavingUser, 1);
-
-      console.log(`leaveRoom - rooms 2:`);
-      console.table(rooms[roomNum]);
-      console.table(rooms);
       if (rooms[roomNum].length === 0) {
         delete rooms[roomNum];
-        console.log(`DELETE ROOM:`);
-        console.table(rooms);
       } else {
         socket.in(roomNum).emit("oppenentLeftTheGame");
-
-        // const timeTemp = setTimeout(() => {
-        //   delete rooms[roomNum];
-        //   console.log(`leaveRoom - rooms 3:`);
-        //   console.table(rooms);
-        //   clearTimeout(timeTemp);
-        // }, 4000);
       }
     }
   });
@@ -441,18 +349,8 @@ game.on("connection", (socket) => {
 
     for (const key in rooms) {
       rooms[key].map((player, playerInd) => {
-        // console.log(`${key}: ${rooms[key][0].userName}`);
-        // console.log(`${key}: ${player.userName}`);
-
         if (player.id === socket.id) {
-          // console.log(`player: ${player.userName}. socket.id: ${socket.id}`);
-
-          console.log(`rooms: 1`);
-          console.table(rooms);
           rooms[key].splice(playerInd, 1);
-          console.log(`rooms: 2`);
-          console.table(rooms);
-
           if (rooms[key].length === 0) {
             delete rooms[key];
           } else {
@@ -460,23 +358,17 @@ game.on("connection", (socket) => {
 
             const timeTemp = setTimeout(() => {
               delete rooms[key];
-              console.log(`rooms: 3`);
-              console.table(rooms);
               clearTimeout(timeTemp);
             }, 4000);
           }
         }
       });
     }
-    console.log("users:1");
-    console.table(users);
     users.map((player, playerInd) => {
       if (player.id === socket.id) {
         users.splice(playerInd, 1);
       }
     });
-    console.log("users:2");
-    console.table(users);
   });
 });
 

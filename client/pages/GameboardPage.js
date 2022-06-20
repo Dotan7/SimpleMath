@@ -132,8 +132,6 @@ function GameboardPage(props) {
           fidbackTextShown.current.innerText = `עזב את המשחק ${props.opponent.userName}`;
           fidbackTextShown.current.style.backgroundColor = "rgb(109, 27, 16)";
         }
-        console.log("140-140", props.roomNum);
-        // leaveGameToGameLobby();
         socket.emit("leaveRoom", props.roomNum);
 
         const timeTemp = setTimeout(() => {
@@ -161,8 +159,6 @@ function GameboardPage(props) {
   }, [props.userName]);
 
   onpopstate = (e) => {
-    console.log("157-157", props.roomNum);
-    // socket.emit("leaveRoom", roomNum);
     leaveGameToGameLobby();
   };
 
@@ -200,7 +196,6 @@ function GameboardPage(props) {
                 "rgb(19, 122, 91,0)";
             }, 1000);
           } else {
-            // not fast enagh
             fidbackTextShown.current.innerText = `תשובה נכונה! אבל לא מספיק מהר`;
             fidbackTextShown.current.style.backgroundColor =
               "rgb(189, 100, 180)";
@@ -253,7 +248,6 @@ function GameboardPage(props) {
   };
 
   const leaveGameToGameLobby = (leftHow) => {
-    console.log("here 265", props.roomNum);
     socket.emit("leaveRoom", props.roomNum);
     props.setRoomNum(null);
     navigate("/battle");

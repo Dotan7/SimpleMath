@@ -64,12 +64,6 @@ function MultiplicationPage(props) {
     );
   }, [questionTopic, numbersRange, fullNumbers]);
 
-  // useEffect(() => {
-  //   if (!props.userName) {
-  //     navigate("/");
-  //   }
-  // }, [props.userName]);
-
   const acceptOrDeclineGame = (yesOrNo) => {
     if (yesOrNo === "yes") {
       props.setIsBeingInvited(false);

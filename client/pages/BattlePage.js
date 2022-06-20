@@ -60,7 +60,6 @@ function BattlePage(props) {
       setwaitingToAnwerFromUser(false);
       setHasBeenAccepted(true);
       props.setOpponent(userAcceptYou);
-      console.log("i invite- got from him: ", roomNum);
       props.setRoomNum(roomNum);
       socket.emit(
         "gameSettings",
@@ -139,7 +138,6 @@ function BattlePage(props) {
     if (yesOrNo === "yes") {
       props.setIsBeingInvited(false);
       socket.emit("acceptGameOffer", me, props.opponent, (answer) => {
-        console.log("i accepted offer: ", answer);
         props.setRoomNum(answer);
         navigate(`/gameboard/${props.opponent.userName}-vs-${props.userName}`);
       });

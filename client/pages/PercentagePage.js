@@ -61,12 +61,6 @@ function PercentagePage(props) {
     );
   }, [questionTopic, ahuzimGameLevel]);
 
-  // useEffect(() => {
-  //   if (!props.userName) {
-  //     navigate("/");
-  //   }
-  // }, [props.userName]);
-
   const acceptOrDeclineGame = (yesOrNo) => {
     if (yesOrNo === "yes") {
       props.setIsBeingInvited(false);
